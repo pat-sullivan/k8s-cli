@@ -41,8 +41,13 @@ class KubernetesCli
     end
 
     def render_pod_choices
+      current_ctx, _res = Open3.capture2(Commands::Kubernetes.current_context)
+      current_ctx = simple_cluster_name(current_ctx)
+
       CLI::UI::Prompt.ask('Which kind of pod do you want to connect to?') do |handler|
         @configuration.pods.each do |pod|
+          next if pod['context'] && !pod['context'].any? { |ctx| current_ctx.end_with?(ctx) }
+
           handler.option(pod['displayName']) do
             connect_to_pod(pod['name'])
           end
