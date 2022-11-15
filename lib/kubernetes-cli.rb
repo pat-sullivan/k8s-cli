@@ -166,24 +166,20 @@ class KubernetesCli
       pod_name
     end
 
+    def simple_cluster_name(full_cluster)
+      full_cluster.to_s.strip.split('/').last
+    end
+
     def current_context
       result, status = Open3.capture2(Commands::Kubernetes.current_context)
       return 'Unable to fetch current context' unless status.success?
 
-      # TODO: Fetch from configuration
-      if result.include?('stream-testing')
-        'Testing'
-      elsif result.include?('shopify-stream-production')
-        'Production'
-      elsif result.include?('shopify-stream-staging')
-        'Staging'
-      elsif result.include?('shopify-stream-bfcm2')
-        'BFCM2'
-      elsif result.include?('shopify-stream-bfcm')
-        'BFCM'
-      else
-        'Unknown context'
-      end
+      cluster = simple_cluster_name(result)
+
+      context = @configuration.contexts.select { |ctx| ctx['name'] == cluster }.first
+      return context['displayName'] if context
+
+      return 'Unknown context'
     end
   end
 end
