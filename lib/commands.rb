@@ -6,7 +6,7 @@ module Commands
       end
 
       def connect_to_pod(pod_name)
-        "kubectl exec -it #{pod_name} /bin/sh"
+        "kubectl exec -it #{pod_name} -- /bin/sh"
       end
 
       def list_hpa
